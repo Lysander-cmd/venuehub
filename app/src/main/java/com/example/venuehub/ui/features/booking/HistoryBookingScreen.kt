@@ -76,7 +76,7 @@ fun HistoryBookingScreen(navController: NavController) {
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        AdminHeader(title = "Riwayat Peminjaman", onBackClick = { /* Tidak perlu back karena di tab */ })
+        AdminHeader(title = "Riwayat Peminjaman", onBackClick = { })
 
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -176,7 +176,6 @@ fun BookingHistoryCard(booking: BookingHistoryItem,navController: NavController)
                 Spacer(modifier = Modifier.height(15.dp))
                 Button(
                     onClick = {
-                        // Navigasi ke Form Checkout bawa ID Booking
                         navController.navigate("checkout/${booking.id}")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
