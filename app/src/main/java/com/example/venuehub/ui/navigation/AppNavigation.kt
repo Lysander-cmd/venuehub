@@ -22,12 +22,23 @@ import com.example.venuehub.ui.features.home.KetentuanScreen
 import com.example.venuehub.ui.features.main.AdminMainScreen
 import com.example.venuehub.ui.features.main.UserMainScreen
 import com.example.venuehub.ui.features.report.AddReportScreen
+import com.kelompok.venuehub.data.SupabaseClient
+import io.github.jan.supabase.auth.auth
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "login") {
+    val currentUser = SupabaseClient.client.auth.currentUserOrNull()
+
+    val startDest = if (currentUser != null) {
+        val isAdmin = currentUser.userMetadata?.get("role_key")?.toString()?.contains("admin") == true
+        if(isAdmin) "admin_home" else "home"
+    } else {
+        "login"
+    }
+
+    NavHost(navController = navController, startDestination = startDest) {
 
         composable("login") {
             LoginScreen(navController = navController)

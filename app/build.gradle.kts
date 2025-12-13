@@ -72,4 +72,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
+
+    implementation("io.github.jan-tennert.supabase:compose-auth:2.5.0")
 }

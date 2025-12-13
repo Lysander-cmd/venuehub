@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.example.venuehub.ui.navigation.AppNavigation
 import com.example.venuehub.ui.theme.VenuehubTheme
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
