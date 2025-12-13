@@ -16,6 +16,7 @@ import com.example.venuehub.ui.features.booking.BookingFormScreen
 import com.example.venuehub.ui.features.booking.CheckoutScreen
 import com.example.venuehub.ui.features.booking.UserRoomDetailScreen
 import com.example.venuehub.ui.features.home.AlurScreen
+import com.example.venuehub.ui.features.home.CategoryRoomScreen
 import com.example.venuehub.ui.features.home.HomeScreen
 import com.example.venuehub.ui.features.home.KetentuanScreen
 import com.example.venuehub.ui.features.main.AdminMainScreen
@@ -88,6 +89,17 @@ fun AppNavigation() {
         }
         composable("add_report") {
             AddReportScreen(navController)
+        }
+        composable(
+            route = "category_rooms/{categoryType}/{categoryName}",
+            arguments = listOf(
+                navArgument("categoryType") { type = NavType.StringType },
+                navArgument("categoryName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("categoryType") ?: ""
+            val name = backStackEntry.arguments?.getString("categoryName") ?: ""
+            CategoryRoomScreen(navController, type, name)
         }
     }
 }

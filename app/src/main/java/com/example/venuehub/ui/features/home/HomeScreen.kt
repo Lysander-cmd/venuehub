@@ -305,7 +305,7 @@ fun RoomCard(room: RoomItemData, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .size(width = 160.dp, height = 210.dp)
-            .clickable { onClick() }, // Bisa diklik
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(3.dp)
@@ -413,7 +413,9 @@ fun CategorySection(navController: NavController) {
                 color = Color(0xFFE3F2FD),
                 iconColor = BluePrimary,
                 modifier = Modifier.weight(1f),
-                onClick = { /* TODO: Filter ke Ruang Kelas */ }
+                onClick = {
+                    navController.navigate("category_rooms/class/Ruang Kelas")
+                }
             )
             CategoryCard(
                 title = "Aula Besar",
@@ -421,7 +423,9 @@ fun CategorySection(navController: NavController) {
                 color = Color(0xFFF3E5F5),
                 iconColor = Color(0xFF9C27B0),
                 modifier = Modifier.weight(1f),
-                onClick = { /* TODO: Filter ke Aula */ }
+                onClick = {
+                    navController.navigate("category_rooms/hall/Aula Besar")
+                }
             )
         }
 
@@ -434,7 +438,9 @@ fun CategorySection(navController: NavController) {
                 color = Color(0xFFE0F2F1),
                 iconColor = Color(0xFF009688),
                 modifier = Modifier.weight(1f),
-                onClick = { /* TODO: Filter ke Lab */ }
+                onClick = {
+                    navController.navigate("category_rooms/lab/Lab Komputer")
+                }
             )
             CategoryCard(
                 title = "Ruang Rapat",
@@ -442,7 +448,9 @@ fun CategorySection(navController: NavController) {
                 color = Color(0xFFFFF3E0),
                 iconColor = Color(0xFFFF9800),
                 modifier = Modifier.weight(1f),
-                onClick = { /* TODO: Filter ke Rapat */ }
+                onClick = {
+                    navController.navigate("category_rooms/meeting/Ruang Rapat")
+                }
             )
         }
     }

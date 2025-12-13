@@ -42,6 +42,7 @@ data class RoomItemData(
     val capacity: Int,
     val description: String? = "",
     val facilities: String? = "",
+    val category: String? = "",
     @SerialName("image_url") val imageUrl: String? = null
 )
 

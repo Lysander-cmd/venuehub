@@ -139,6 +139,16 @@ fun CheckoutScreen(navController: NavController, bookingId: Long) {
                                 )
                                 SupabaseClient.client.from("checkouts").insert(checkout)
 
+                                SupabaseClient.client.from("bookings").update(
+                                    {
+                                        set("status", "completed")
+                                    }
+                                ) {
+                                    filter {
+                                        eq("id", bookingId)
+                                    }
+                                }
+
                                 Toast.makeText(context, "Checkout Berhasil! Terima kasih.", Toast.LENGTH_LONG).show()
                                 navController.popBackStack()
 

@@ -103,12 +103,14 @@ fun HistoryBookingScreen(navController: NavController) {
 fun BookingHistoryCard(booking: BookingHistoryItem,navController: NavController) {
     val statusColor = when (booking.status.lowercase()) {
         "approved" -> Color(0xFF4CAF50)
+        "completed" -> Color(0xFF2196F3)
         "rejected" -> Color(0xFFF44336)
         else -> Color(0xFFFF9800)
     }
 
     val statusText = when (booking.status.lowercase()) {
         "approved" -> "Disetujui"
+        "completed" -> "Selesai"
         "rejected" -> "Ditolak"
         else -> "Menunggu Konfirmasi"
     }
@@ -184,6 +186,15 @@ fun BookingHistoryCard(booking: BookingHistoryItem,navController: NavController)
                 ) {
                     Text("Checkout / Selesai", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
+            }
+            if (booking.status == "completed") {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Peminjaman telah selesai.",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
