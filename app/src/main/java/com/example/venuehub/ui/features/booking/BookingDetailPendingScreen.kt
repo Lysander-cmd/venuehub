@@ -1,27 +1,11 @@
 package com.example.venuehub.ui.features.booking
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -67,7 +51,6 @@ fun formatDateTimeRange(start: String, end: String): String {
         "-"
     }
 }
-
 
 fun bookingStatusText(status: String): String = when (status.lowercase()) {
     "approved" -> "Disetujui"
@@ -130,7 +113,8 @@ fun BookingDetailPendingScreen(
                 title = "Detail Peminjaman",
                 onBackClick = { navController.popBackStack() }
             )
-        }
+        },
+        containerColor = Color(0xFFF5F5F5) // Memberikan kontras pada card
     ) { padding ->
 
         if (isLoading) {
@@ -153,20 +137,19 @@ fun BookingDetailPendingScreen(
                 "Status" to bookingStatusText(booking?.status ?: "pending")
             )
 
-
             /** 🔥 LazyColumn DI DETAIL */
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
 
                 item {
                     Text(
                         text = booking?.rooms?.name ?: "-",
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = BluePrimary
                     )
@@ -174,27 +157,46 @@ fun BookingDetailPendingScreen(
 
                 item {
                     Card(
-                        shape = RoundedCornerShape(10.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(2.dp)
                     ) {
-                        Column(modifier = Modifier.padding(14.dp)) {
-                            detailItems.forEach { (label, value) ->
-                                Text(label, fontWeight = FontWeight.Medium)
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(value ?: "-", color = Color.DarkGray)
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            detailItems.forEachIndexed { index, (label, value) ->
+                                Column {
+                                    Text(
+                                        text = label,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = value ?: "-",
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (label == "Status") bookingStatusColor(booking?.status ?: "pending") else Color.Black
+                                    )
+                                }
 
-                                Spacer(modifier = Modifier.height(10.dp))
+                                if (index < detailItems.size - 1) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(vertical = 12.dp),
+                                        thickness = 0.5.dp,
+                                        color = Color.LightGray.copy(alpha = 0.5f)
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-
                 item {
                     Text(
                         text = "Kartu Tanda Mahasiswa (KTM)",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                 }
 
