@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.venuehub.ui.features.booking.RoomInfo
+import com.example.venuehub.model.RoomInfo
 import com.example.venuehub.ui.theme.BluePrimary
 import com.kelompok.venuehub.data.SupabaseClient
 import io.github.jan.supabase.postgrest.from

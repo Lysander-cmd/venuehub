@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.venuehub.ui.features.booking.BookingHistoryItem
+import com.example.venuehub.model.BookingHistoryItem
 import com.example.venuehub.ui.theme.BluePrimary
 import com.kelompok.venuehub.data.SupabaseClient
 import io.github.jan.supabase.postgrest.from
