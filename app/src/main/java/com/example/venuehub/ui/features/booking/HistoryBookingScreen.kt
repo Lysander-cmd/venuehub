@@ -23,6 +23,7 @@ import com.example.venuehub.ui.features.admin.AdminHeader
 import com.example.venuehub.ui.theme.BluePrimary
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.TimeZone
 
 @Composable
 fun HistoryBookingScreen(
@@ -77,13 +78,18 @@ fun BookingHistoryCard(booking: BookingHistoryItem, navController: NavController
         else -> "Menunggu Konfirmasi"
     }
 
+    // FORMAT TANGGAL: Konversi dari UTC (Database) ke Asia/Jakarta (WIB)
     val displayDate = try {
-        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val formatter = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val formatter = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID")).apply {
+            timeZone = TimeZone.getTimeZone("Asia/Jakarta")
+        }
         val date = parser.parse(booking.start_time)
-        formatter.format(date ?: "")
+        formatter.format(date!!)
     } catch (e: Exception) {
-        booking.start_time
+        booking.start_time // Fallback jika error
     }
 
     Card(
