@@ -22,12 +22,12 @@ class BookingDetailPendingViewModel : ViewModel() {
                 booking = SupabaseClient.client
                     .from("bookings")
                     .select(
-//                    Columns.raw(
-//                        "id,event_name,start_time,end_time,status,ktm_url,rooms(name)"
-//                    )
-                        Columns.raw(
-                            "id,event_name,start_time,end_time,status,rooms(name)"
-                        )
+                    Columns.raw(
+                        "id,event_name,start_time,end_time,status,ktm_url,rooms(name)"
+                    )
+//                        Columns.raw(
+//                            "id,event_name,start_time,end_time,status,rooms(name)"
+//                        )
                     ) {
                         filter { eq("id", bookingId) }
                     }

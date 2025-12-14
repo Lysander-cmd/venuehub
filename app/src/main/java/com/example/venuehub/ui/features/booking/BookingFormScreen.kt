@@ -198,41 +198,47 @@ fun BookingFormScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedButton(
-                    onClick = { ktmPicker.launch("image/*") },
-                    modifier = Modifier.fillMaxWidth()
+                Card(
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(10.dp))
+                        .clickable { ktmPicker.launch("image/*") }
                 ) {
-                    Text(
-                        text = if (viewModel.ktmUri == null) "Pilih Foto KTM" else "KTM Dipilih",
-                        color = if (viewModel.ktmUri == null) Color.Gray else BluePrimary
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (viewModel.ktmUri == null) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Upload Foto KTM",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Tap untuk memilih gambar",
+                                    fontSize = 12.sp,
+                                    color = Color.LightGray
+                                )
+                            }
+                        } else {
+                            AsyncImage(
+                                model = viewModel.ktmUri,
+                                contentDescription = "Preview KTM",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    }
                 }
-
-//                                    if (ktmUri == null) {
-//                                        Toast.makeText(context, "Mohon upload KTM", Toast.LENGTH_SHORT).show()
-//                                        isLoading = false
-//                                        return@launch
-//                                    }
-
-//                                    val inputStream = context.contentResolver.openInputStream(ktmUri!!)
-//                                    val ktmBytes = inputStream?.readBytes()
-//                                    inputStream?.close()
-//
-//                                    if (ktmBytes == null) {
-//                                        Toast.makeText(context, "Gagal membaca file KTM", Toast.LENGTH_SHORT).show()
-//                                        isLoading = false
-//                                        return@launch
-//                                    }
-//
-//                                    val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
-//
-//                                    SupabaseClient.client.storage
-//                                        .from("ktm")
-//                                        .upload(fileName, ktmBytes)
-//
-//                                    val ktmUrl = SupabaseClient.client.storage
-//                                        .from("ktm")
-//                                        .publicUrl(fileName)
 
 
                 Spacer(modifier = Modifier.height(100.dp))

@@ -49,9 +49,15 @@ class BookingViewModel : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
-                val user = SupabaseClient.client.auth.currentUserOrNull() ?: return@launch
+                val user = SupabaseClient.client.auth.currentUserOrNull()
+                    ?: throw Exception("User belum login")
 
-                // Logika pembentukan ISO Time dari input
+                if (ktmUri == null) {
+                    onError("Kartu Tanda Mahasiswa (KTM) wajib diunggah.")
+                    return@launch
+                }
+
+                // ===== LOGIKA WAKTU =====
                 val dateParts = selectedDate.split("/")
                 val day = dateParts[0].toInt()
                 val month = dateParts[1].toInt()
@@ -64,7 +70,10 @@ class BookingViewModel : ViewModel() {
                     val cal = Calendar.getInstance()
                     cal.set(year, month - 1, day, hour, minute, 0)
                     cal.set(Calendar.MILLISECOND, 0)
-                    val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+                    val sdf = java.text.SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss'Z'",
+                        java.util.Locale.US
+                    )
                     sdf.timeZone = TimeZone.getTimeZone("UTC")
                     return sdf.format(cal.time)
                 }
@@ -77,7 +86,7 @@ class BookingViewModel : ViewModel() {
                     return@launch
                 }
 
-                // Cek jadwal bentrok (Read)
+                // ===== CEK JADWAL BENTROK (READ) =====
                 val existingBooking = SupabaseClient.client.from("bookings")
                     .select {
                         filter {
@@ -93,21 +102,32 @@ class BookingViewModel : ViewModel() {
                     return@launch
                 }
 
-                // Upload ke Cloud Storage
-                var ktmUrl: String? = null
-                if (ktmUri != null) {
-                    val inputStream = context.contentResolver.openInputStream(ktmUri!!)
-                    val ktmBytes = inputStream?.readBytes()
-                    inputStream?.close()
+                // ===== UPLOAD KTM (CLOUD STORAGE) =====
+                val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
+                val bucket = SupabaseClient.client.storage.from("ktm-images")
 
-                    if (ktmBytes != null) {
-                        val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
-                        SupabaseClient.client.storage.from("ktm").upload(fileName, ktmBytes)
-                        ktmUrl = SupabaseClient.client.storage.from("ktm").publicUrl(fileName)
-                    }
+                // ===== VALIDASI KTM =====
+                val mimeType = context.contentResolver.getType(ktmUri!!)
+                if (mimeType == null || !mimeType.startsWith("image/")) {
+                    onError("Format KTM harus berupa gambar (JPG / PNG)")
+                    return@launch
                 }
 
-                // Insert ke Database
+                val ktmBytes = context.contentResolver
+                    .openInputStream(ktmUri!!)
+                    ?.use { it.readBytes() }
+                    ?: throw Exception("Gagal membaca file KTM")
+
+                val maxSize = 2 * 1024 * 1024
+                if (ktmBytes.size > maxSize) {
+                    onError("Ukuran file KTM maksimal 2 MB")
+                    return@launch
+                }
+
+                bucket.upload(fileName, ktmBytes)
+                val ktmUrl = bucket.publicUrl(fileName)
+
+                // ===== INSERT DATABASE =====
                 val booking = BookingRequest(
                     room_id = roomId,
                     user_id = user.id,
@@ -122,11 +142,7 @@ class BookingViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                if (e.message?.contains("no_overlap_booking") == true) {
-                    onError("Gagal: Jadwal Bentrok (Database)")
-                } else {
-                    onError("Error: ${e.message}")
-                }
+                onError(e.message ?: "Terjadi kesalahan")
             } finally {
                 isLoading = false
             }

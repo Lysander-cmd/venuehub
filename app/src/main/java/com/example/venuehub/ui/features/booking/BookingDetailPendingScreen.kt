@@ -67,18 +67,6 @@ fun bookingStatusColor(status: String): Color = when (status.lowercase()) {
     else -> Color(0xFFFF9800)
 }
 
-// Model ini tetap saya biarkan di sini sesuai permintaanmu agar tidak ada yang dihapus
-@Serializable
-data class BookingDetailPending(
-    val id: Long,
-    val event_name: String,
-    val start_time: String,
-    val end_time: String,
-    val status: String,
-//    val ktm_url: String,
-    val rooms: com.example.venuehub.model.RoomInfo? = null // Sesuaikan path modelnya
-)
-
 @Composable
 fun BookingDetailPendingScreen(
     bookingId: Long,
@@ -120,7 +108,7 @@ fun BookingDetailPendingScreen(
                 "Status" to bookingStatusText(viewModel.booking?.status ?: "pending")
             )
 
-            /** 🔥 LazyColumn DI DETAIL */
+            // LazyColumn DI DETAIL
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -183,21 +171,30 @@ fun BookingDetailPendingScreen(
                     )
                 }
 
-//                item {
-//                    Card(
-//                        shape = RoundedCornerShape(10.dp),
-//                        elevation = CardDefaults.cardElevation(2.dp)
-//                    ) {
-//                        AsyncImage(
-//                            model = booking?.ktm_url,
-//                            contentDescription = "KTM",
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(240.dp),
-//                            contentScale = ContentScale.Fit
-//                        )
-//                    }
-//                }
+                item {
+                    if (!viewModel.booking?.ktm_url.isNullOrBlank()) {
+                        Card(
+                            shape = RoundedCornerShape(10.dp),
+                            elevation = CardDefaults.cardElevation(2.dp)
+                        ) {
+                            AsyncImage(
+                                model = viewModel.booking?.ktm_url,
+                                contentDescription = "KTM",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(240.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "KTM tidak tersedia",
+                            color = Color.Gray,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
             }
         }
     }

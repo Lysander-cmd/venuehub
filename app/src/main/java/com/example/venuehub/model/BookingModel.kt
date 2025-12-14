@@ -31,8 +31,8 @@ data class BookingRequest(
     val event_name: String,
     val start_time: String,
     val end_time: String,
-//    val ktm_url: String,
-    val ktm_url: String? = null,
+    val ktm_url: String,
+//    val ktm_url: String? = null,
     val status: String = "pending"
 )
 
@@ -58,6 +58,6 @@ data class BookingDetailPending(
     val start_time: String,
     val end_time: String,
     val status: String,
-//    val ktm_url: String,
+    val ktm_url: String? = null,
     val rooms: RoomInfo? = null
 )
