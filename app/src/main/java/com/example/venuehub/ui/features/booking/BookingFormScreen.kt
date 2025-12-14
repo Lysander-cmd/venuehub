@@ -3,6 +3,9 @@ package com.example.venuehub.ui.features.booking
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.widget.Toast
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +38,7 @@ import com.kelompok.venuehub.data.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Count
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.util.Calendar
@@ -47,6 +51,8 @@ data class BookingRequest(
     val event_name: String,
     val start_time: String,
     val end_time: String,
+//    val ktm_url: String,
+    val ktm_url: String? = null,
     val status: String = "pending"
 )
 
@@ -63,6 +69,9 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
 
     val calendar = Calendar.getInstance()
     var isLoading by remember { mutableStateOf(false) }
+
+    var ktmUri by remember { mutableStateOf<Uri?>(null) }
+
 
     LaunchedEffect(roomId) {
         try {
@@ -99,6 +108,12 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
             selectedTimeEnd = String.format("%02d:%02d", hour, minute)
         }, 10, 0, true
     )
+
+    val ktmPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        ktmUri = uri
+    }
 
     Scaffold(
         topBar = {
@@ -164,15 +179,63 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
                                         isLoading = false
                                         return@launch
                                     }
+//                                    if (ktmUri == null) {
+//                                        Toast.makeText(context, "Mohon upload KTM", Toast.LENGTH_SHORT).show()
+//                                        isLoading = false
+//                                        return@launch
+//                                    }
+
+//                                    val inputStream = context.contentResolver.openInputStream(ktmUri!!)
+//                                    val ktmBytes = inputStream?.readBytes()
+//                                    inputStream?.close()
+//
+//                                    if (ktmBytes == null) {
+//                                        Toast.makeText(context, "Gagal membaca file KTM", Toast.LENGTH_SHORT).show()
+//                                        isLoading = false
+//                                        return@launch
+//                                    }
+//
+//                                    val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
+//
+//                                    SupabaseClient.client.storage
+//                                        .from("ktm")
+//                                        .upload(fileName, ktmBytes)
+//
+//                                    val ktmUrl = SupabaseClient.client.storage
+//                                        .from("ktm")
+//                                        .publicUrl(fileName)
+
+                                    var ktmUrl: String? = null
+
+                                    if (ktmUri != null) {
+                                        val inputStream = context.contentResolver.openInputStream(ktmUri!!)
+                                        val ktmBytes = inputStream?.readBytes()
+                                        inputStream?.close()
+
+                                        if (ktmBytes != null) {
+                                            val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
+
+                                            SupabaseClient.client.storage
+                                                .from("ktm")
+                                                .upload(fileName, ktmBytes)
+
+                                            ktmUrl = SupabaseClient.client.storage
+                                                .from("ktm")
+                                                .publicUrl(fileName)
+                                        }
+                                    }
+
                                     val booking = BookingRequest(
                                         room_id = roomId,
                                         user_id = user.id,
                                         event_name = eventName,
                                         start_time = finalStartIso,
-                                        end_time = finalEndIso
+                                        end_time = finalEndIso,
+                                        ktm_url = ktmUrl
                                     )
 
                                     SupabaseClient.client.from("bookings").insert(booking)
+
 
                                     Toast.makeText(context, "Pengajuan Berhasil!", Toast.LENGTH_LONG).show()
                                     navController.popBackStack("home", inclusive = false)
@@ -268,6 +331,27 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Text(
+                    text = "Upload KTM",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = { ktmPicker.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (ktmUri == null) "Pilih Foto KTM" else "KTM Dipilih",
+                        color = if (ktmUri == null) Color.Gray else BluePrimary
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.height(100.dp))
             }

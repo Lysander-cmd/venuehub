@@ -12,6 +12,7 @@ import com.example.venuehub.ui.features.admin.AdminRoomListScreen
 // Import layar Login dan Register yang sudah kita buat
 import com.example.venuehub.ui.features.auth.LoginScreen
 import com.example.venuehub.ui.features.auth.RegisterScreen
+import com.example.venuehub.ui.features.booking.BookingDetailPendingScreen
 import com.example.venuehub.ui.features.booking.BookingFormScreen
 import com.example.venuehub.ui.features.booking.CheckoutScreen
 import com.example.venuehub.ui.features.booking.UserRoomDetailScreen
@@ -112,5 +113,19 @@ fun AppNavigation() {
             val name = backStackEntry.arguments?.getString("categoryName") ?: ""
             CategoryRoomScreen(navController, type, name)
         }
+
+        composable(
+            "booking_detail_pending/{bookingId}"
+        ) { backStackEntry ->
+            val bookingId = backStackEntry.arguments
+                ?.getString("bookingId")
+                ?.toLongOrNull() ?: return@composable
+
+            BookingDetailPendingScreen(
+                bookingId = bookingId,
+                navController = navController
+            )
+        }
+
     }
 }

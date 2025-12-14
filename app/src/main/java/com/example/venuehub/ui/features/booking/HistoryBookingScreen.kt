@@ -1,6 +1,7 @@
 package com.example.venuehub.ui.features.booking
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -128,8 +129,15 @@ fun BookingHistoryCard(booking: BookingHistoryItem,navController: NavController)
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                enabled = booking.status == "pending"
+            ) {
+                navController.navigate("booking_detail_pending/${booking.id}")
+            }
+    )
+    {
         Column(modifier = Modifier.padding(15.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
