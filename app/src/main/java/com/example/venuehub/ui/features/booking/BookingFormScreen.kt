@@ -20,74 +20,38 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.venuehub.ui.components.VenueHubButton
 import com.example.venuehub.ui.features.admin.AdminHeader
 import com.example.venuehub.ui.features.admin.AdminInputRef
-import com.example.venuehub.ui.features.admin.RoomItemData
 import com.example.venuehub.ui.theme.BluePrimary
-import com.kelompok.venuehub.data.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Count
-import io.github.jan.supabase.storage.storage
-import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import java.util.Calendar
 
-
-@Serializable
-data class BookingRequest(
-    val room_id: Long,
-    val user_id: String,
-    val event_name: String,
-    val start_time: String,
-    val end_time: String,
-//    val ktm_url: String,
-    val ktm_url: String? = null,
-    val status: String = "pending"
-)
-
 @Composable
-fun BookingFormScreen(navController: NavController, roomId: Long) {
+fun BookingFormScreen(
+    navController: NavController,
+    roomId: Long,
+    viewModel: BookingViewModel = viewModel() // POIN 5: Menerapkan ViewModel
+) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var roomData by remember { mutableStateOf<RoomItemData?>(null) }
-
-    var eventName by remember { mutableStateOf("") }
-    var selectedDate by remember { mutableStateOf("") }
-    var selectedTimeStart by remember { mutableStateOf("") }
-    var selectedTimeEnd by remember { mutableStateOf("") }
-
     val calendar = Calendar.getInstance()
-    var isLoading by remember { mutableStateOf(false) }
-
-    var ktmUri by remember { mutableStateOf<Uri?>(null) }
-
 
     LaunchedEffect(roomId) {
-        try {
-            val result = SupabaseClient.client.from("rooms")
-                .select { filter { eq("id", roomId) } }
-                .decodeSingle<RoomItemData>()
-            roomData = result
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        viewModel.fetchRoomData(roomId)
     }
 
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
-            selectedDate = "$dayOfMonth/${month + 1}/$year"
+            viewModel.selectedDate = "$dayOfMonth/${month + 1}/$year"
             calendar.set(year, month, dayOfMonth)
         },
         calendar.get(Calendar.YEAR),
@@ -98,21 +62,21 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
     val timePickerStart = TimePickerDialog(
         context,
         { _, hour, minute ->
-            selectedTimeStart = String.format("%02d:%02d", hour, minute)
+            viewModel.selectedTimeStart = String.format("%02d:%02d", hour, minute)
         }, 8, 0, true
     )
 
     val timePickerEnd = TimePickerDialog(
         context,
         { _, hour, minute ->
-            selectedTimeEnd = String.format("%02d:%02d", hour, minute)
+            viewModel.selectedTimeEnd = String.format("%02d:%02d", hour, minute)
         }, 10, 0, true
     )
 
     val ktmPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
-        ktmUri = uri
+        viewModel.ktmUri = uri
     }
 
     Scaffold(
@@ -121,64 +85,129 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
         },
         bottomBar = {
             Box(modifier = Modifier.padding(20.dp).imePadding()) {
-                if (isLoading) {
+                if (viewModel.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = BluePrimary)
                 } else {
                     VenueHubButton(
                         text = "Ajukan Peminjaman",
                         onClick = {
-                            if (eventName.isBlank() || selectedDate.isBlank() || selectedTimeStart.isBlank() || selectedTimeEnd.isBlank()) {
+                            if (viewModel.eventName.isBlank() || viewModel.selectedDate.isBlank() || viewModel.selectedTimeStart.isBlank() || viewModel.selectedTimeEnd.isBlank()) {
                                 Toast.makeText(context, "Mohon lengkapi semua data!", Toast.LENGTH_SHORT).show()
                                 return@VenueHubButton
                             }
-                            scope.launch {
-                                isLoading = true
-                                try {
-                                    val user = SupabaseClient.client.auth.currentUserOrNull() ?: return@launch
 
-                                    val dateParts = selectedDate.split("/")
-                                    val day = dateParts[0].toInt()
-                                    val month = dateParts[1].toInt()
-                                    val year = dateParts[2].toInt()
-                                    fun makeIso(timeStr: String): String {
-                                        val timeParts = timeStr.split(":")
-                                        val hour = timeParts[0].toInt()
-                                        val minute = timeParts[1].toInt()
-                                        val cal = Calendar.getInstance()
+                            viewModel.submitBooking(
+                                context = context,
+                                roomId = roomId,
+                                onSuccess = {
+                                    Toast.makeText(context, "Pengajuan Berhasil!", Toast.LENGTH_LONG).show()
+                                    navController.popBackStack("home", inclusive = false)
+                                },
+                                onError = { msg ->
+                                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(Color.White)
+                .verticalScroll(rememberScrollState())
+        ) {
 
-                                        cal.set(year, month - 1, day, hour, minute, 0)
-                                        cal.set(Calendar.MILLISECOND, 0)
+            viewModel.roomData?.let { room ->
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(10.dp),
+                        elevation = CardDefaults.cardElevation(2.dp)
+                    ) {
+                        AsyncImage(
+                            model = room.imageUrl,
+                            contentDescription = null,
+                            modifier = Modifier.size(80.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Column {
+                        Text(room.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("Kapasitas: ${room.capacity}", color = Color.Gray, fontSize = 12.sp)
+                    }
+                }
+                HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
+            }
 
-                                        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
-                                        sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
 
-                                        return sdf.format(cal.time)
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text("Masukan Detail Peminjaman", style = MaterialTheme.typography.titleMedium, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(15.dp))
 
-                                    }
+                AdminInputRef(
+                    value = viewModel.eventName,
+                    onValueChange = { viewModel.eventName = it },
+                    hint = "Keperluan / Nama Acara"
+                )
 
-                                    val finalStartIso = makeIso(selectedTimeStart)
-                                    val finalEndIso = makeIso(selectedTimeEnd)
+                Spacer(modifier = Modifier.height(10.dp))
 
-                                    if (finalEndIso <= finalStartIso) {
-                                        Toast.makeText(context, "Jam selesai tidak boleh sebelum jam mulai!", Toast.LENGTH_LONG).show()
-                                        return@launch
-                                    }
+                ClickableInput(
+                    value = viewModel.selectedDate,
+                    hint = "Pilih Tanggal",
+                    icon = Icons.Default.CalendarToday,
+                    onClick = { datePickerDialog.show() }
+                )
 
-                                    val existingBooking = SupabaseClient.client.from("bookings")
-                                        .select {
-                                            filter {
-                                                eq("room_id", roomId)
-                                                neq("status", "rejected")
+                Spacer(modifier = Modifier.height(10.dp))
 
-                                                lt("start_time", finalEndIso)
-                                                gt("end_time", finalStartIso)
-                                            }
-                                        }.decodeList<BookingRequest>()
-                                    if (existingBooking.isNotEmpty()) {
-                                        Toast.makeText(context, "Jadwal penuh! Ruangan sudah dipesan di jam tersebut.", Toast.LENGTH_LONG).show()
-                                        isLoading = false
-                                        return@launch
-                                    }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        ClickableInput(
+                            value = viewModel.selectedTimeStart,
+                            hint = "Mulai",
+                            icon = Icons.Default.Schedule,
+                            onClick = { timePickerStart.show() }
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        ClickableInput(
+                            value = viewModel.selectedTimeEnd,
+                            hint = "Selesai",
+                            icon = Icons.Default.Schedule,
+                            onClick = { timePickerEnd.show() }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Text(
+                    text = "Upload KTM",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = { ktmPicker.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (viewModel.ktmUri == null) "Pilih Foto KTM" else "KTM Dipilih",
+                        color = if (viewModel.ktmUri == null) Color.Gray else BluePrimary
+                    )
+                }
+
 //                                    if (ktmUri == null) {
 //                                        Toast.makeText(context, "Mohon upload KTM", Toast.LENGTH_SHORT).show()
 //                                        isLoading = false
@@ -204,153 +233,6 @@ fun BookingFormScreen(navController: NavController, roomId: Long) {
 //                                    val ktmUrl = SupabaseClient.client.storage
 //                                        .from("ktm")
 //                                        .publicUrl(fileName)
-
-                                    var ktmUrl: String? = null
-
-                                    if (ktmUri != null) {
-                                        val inputStream = context.contentResolver.openInputStream(ktmUri!!)
-                                        val ktmBytes = inputStream?.readBytes()
-                                        inputStream?.close()
-
-                                        if (ktmBytes != null) {
-                                            val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
-
-                                            SupabaseClient.client.storage
-                                                .from("ktm")
-                                                .upload(fileName, ktmBytes)
-
-                                            ktmUrl = SupabaseClient.client.storage
-                                                .from("ktm")
-                                                .publicUrl(fileName)
-                                        }
-                                    }
-
-                                    val booking = BookingRequest(
-                                        room_id = roomId,
-                                        user_id = user.id,
-                                        event_name = eventName,
-                                        start_time = finalStartIso,
-                                        end_time = finalEndIso,
-                                        ktm_url = ktmUrl
-                                    )
-
-                                    SupabaseClient.client.from("bookings").insert(booking)
-
-
-                                    Toast.makeText(context, "Pengajuan Berhasil!", Toast.LENGTH_LONG).show()
-                                    navController.popBackStack("home", inclusive = false)
-
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                      if (e.message?.contains("no_overlap_booking") == true) {
-                                        Toast.makeText(context, "Gagal: Jadwal Bentrok (Database)", Toast.LENGTH_LONG).show()
-                                    } else {
-                                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                } finally {
-                                    isLoading = false
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(Color.White)
-                .verticalScroll(rememberScrollState())
-        ) {
-
-            roomData?.let { room ->
-                Row(
-                    modifier = Modifier.padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Card(
-                        shape = RoundedCornerShape(10.dp),
-                        elevation = CardDefaults.cardElevation(2.dp)
-                    ) {
-                        AsyncImage(
-                            model = room.imageUrl,
-                            contentDescription = null,
-                            modifier = Modifier.size(80.dp),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(15.dp))
-                    Column {
-                        Text(room.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Text("Kapasitas: ${room.capacity}", color = Color.Gray, fontSize = 12.sp)
-                    }
-                }
-                Divider(color = Color(0xFFEEEEEE), thickness = 1.dp)
-            }
-
-
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text("Masukan Detail Peminjaman", style = MaterialTheme.typography.titleMedium, fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(15.dp))
-
-                AdminInputRef(
-                    value = eventName,
-                    onValueChange = { eventName = it },
-                    hint = "Keperluan / Nama Acara"
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                ClickableInput(
-                    value = selectedDate,
-                    hint = "Pilih Tanggal",
-                    icon = Icons.Default.CalendarToday,
-                    onClick = { datePickerDialog.show() }
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        ClickableInput(
-                            value = selectedTimeStart,
-                            hint = "Mulai",
-                            icon = Icons.Default.Schedule,
-                            onClick = { timePickerStart.show() }
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        ClickableInput(
-                            value = selectedTimeEnd,
-                            hint = "Selesai",
-                            icon = Icons.Default.Schedule,
-                            onClick = { timePickerEnd.show() }
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = "Upload KTM",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = { ktmPicker.launch("image/*") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (ktmUri == null) "Pilih Foto KTM" else "KTM Dipilih",
-                        color = if (ktmUri == null) Color.Gray else BluePrimary
-                    )
-                }
 
 
                 Spacer(modifier = Modifier.height(100.dp))

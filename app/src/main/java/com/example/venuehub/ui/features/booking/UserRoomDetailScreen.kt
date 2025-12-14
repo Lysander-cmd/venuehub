@@ -18,31 +18,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.venuehub.ui.components.VenueHubButton
 import com.example.venuehub.ui.features.admin.AdminHeader
 import com.example.venuehub.ui.features.admin.RoomItemData
 import com.example.venuehub.ui.theme.BluePrimary
-import com.kelompok.venuehub.data.SupabaseClient
-import io.github.jan.supabase.postgrest.from
 
 @Composable
-fun UserRoomDetailScreen(navController: NavController, roomId: Long) {
-    var roomData by remember { mutableStateOf<RoomItemData?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-
+fun UserRoomDetailScreen(
+    navController: NavController,
+    roomId: Long,
+    viewModel: RoomDetailViewModel = viewModel()
+) {
+    // Panggil fungsi fetch dari ViewModel
     LaunchedEffect(roomId) {
-        try {
-            val result = SupabaseClient.client.from("rooms")
-                .select { filter { eq("id", roomId) } }
-                .decodeSingle<RoomItemData>()
-            roomData = result
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            isLoading = false
-        }
+        viewModel.fetchRoomDetail(roomId)
     }
 
     Scaffold(
@@ -50,7 +42,7 @@ fun UserRoomDetailScreen(navController: NavController, roomId: Long) {
             AdminHeader(title = "Detail Ruangan", onBackClick = { navController.popBackStack() })
         },
         bottomBar = {
-            if (roomData != null) {
+            if (viewModel.roomData != null) {
                 Box(
                     modifier = Modifier
                         .padding(20.dp)
@@ -66,12 +58,12 @@ fun UserRoomDetailScreen(navController: NavController, roomId: Long) {
             }
         }
     ) { paddingValues ->
-        if (isLoading) {
+        if (viewModel.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = BluePrimary)
             }
         } else {
-            roomData?.let { room ->
+            viewModel.roomData?.let { room ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -105,7 +97,8 @@ fun UserRoomDetailScreen(navController: NavController, roomId: Long) {
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
-                        Divider(color = Color(0xFFEEEEEE), thickness = 1.dp)
+                        // Divider diganti HorizontalDivider sesuai Material3 terbaru agar tidak merah
+                        HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
                         Spacer(modifier = Modifier.height(20.dp))
 
                         Text("Deskripsi", fontWeight = FontWeight.Bold, fontSize = 16.sp)

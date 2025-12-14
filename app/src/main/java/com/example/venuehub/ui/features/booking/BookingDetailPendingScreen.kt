@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.venuehub.ui.features.admin.AdminHeader
@@ -66,6 +67,7 @@ fun bookingStatusColor(status: String): Color = when (status.lowercase()) {
     else -> Color(0xFFFF9800)
 }
 
+// Model ini tetap saya biarkan di sini sesuai permintaanmu agar tidak ada yang dihapus
 @Serializable
 data class BookingDetailPending(
     val id: Long,
@@ -74,37 +76,18 @@ data class BookingDetailPending(
     val end_time: String,
     val status: String,
 //    val ktm_url: String,
-    val rooms: RoomInfo? = null
+    val rooms: com.example.venuehub.model.RoomInfo? = null // Sesuaikan path modelnya
 )
 
 @Composable
 fun BookingDetailPendingScreen(
     bookingId: Long,
-    navController: NavController
+    navController: NavController,
+    viewModel: BookingDetailPendingViewModel = viewModel() // Panggil ViewModel
 ) {
-    var booking by remember { mutableStateOf<BookingDetailPending?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-
+    // Ambil data lewat ViewModel
     LaunchedEffect(bookingId) {
-        try {
-            booking = SupabaseClient.client
-                .from("bookings")
-                .select(
-//                    Columns.raw(
-//                        "id,event_name,start_time,end_time,status,ktm_url,rooms(name)"
-//                    )
-                    Columns.raw(
-                        "id,event_name,start_time,end_time,status,rooms(name)"
-                    )
-                ) {
-                    filter { eq("id", bookingId) }
-                }
-                .decodeSingle()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            isLoading = false
-        }
+        viewModel.fetchBookingDetail(bookingId)
     }
 
     Scaffold(
@@ -117,7 +100,7 @@ fun BookingDetailPendingScreen(
         containerColor = Color(0xFFF5F5F5) // Memberikan kontras pada card
     ) { padding ->
 
-        if (isLoading) {
+        if (viewModel.isLoading) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -129,12 +112,12 @@ fun BookingDetailPendingScreen(
         } else {
 
             val detailItems = listOf(
-                "Nama Acara" to booking?.event_name,
+                "Nama Acara" to viewModel.booking?.event_name,
                 "Waktu" to formatDateTimeRange(
-                    booking?.start_time ?: "",
-                    booking?.end_time ?: ""
+                    viewModel.booking?.start_time ?: "",
+                    viewModel.booking?.end_time ?: ""
                 ),
-                "Status" to bookingStatusText(booking?.status ?: "pending")
+                "Status" to bookingStatusText(viewModel.booking?.status ?: "pending")
             )
 
             /** 🔥 LazyColumn DI DETAIL */
@@ -148,7 +131,7 @@ fun BookingDetailPendingScreen(
 
                 item {
                     Text(
-                        text = booking?.rooms?.name ?: "-",
+                        text = viewModel.booking?.rooms?.name ?: "-",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = BluePrimary
@@ -175,7 +158,7 @@ fun BookingDetailPendingScreen(
                                         text = value ?: "-",
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = if (label == "Status") bookingStatusColor(booking?.status ?: "pending") else Color.Black
+                                        color = if (label == "Status") bookingStatusColor(viewModel.booking?.status ?: "pending") else Color.Black
                                     )
                                 }
 
