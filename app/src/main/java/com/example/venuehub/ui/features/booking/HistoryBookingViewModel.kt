@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.venuehub.model.BookingHistoryItem
+import com.example.venuehub.model.BookingWithCheckout
 import com.kelompok.venuehub.data.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
@@ -14,7 +14,7 @@ import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.coroutines.launch
 
 class HistoryViewModel : ViewModel() {
-    var bookingList by mutableStateOf<List<BookingHistoryItem>>(emptyList())
+    var bookingList by mutableStateOf<List<BookingWithCheckout>>(emptyList())
     var isLoading by mutableStateOf(true)
 
     // Database Read (Fetch History)
@@ -26,13 +26,13 @@ class HistoryViewModel : ViewModel() {
                 if (user != null) {
                     // Fetch bookings user ini, join dengan tabel rooms untuk ambil nama ruangan
                     val result = SupabaseClient.client.from("bookings")
-                        .select(columns = Columns.raw("*, rooms(name)")) {
+                        .select(columns = Columns.raw("*, rooms(name), checkouts(clean_proof_url, notes)")) {
                             filter {
                                 eq("user_id", user.id)
                             }
                             order("created_at", order = Order.DESCENDING)
                         }
-                        .decodeList<BookingHistoryItem>()
+                        .decodeList<BookingWithCheckout>()
                     bookingList = result
                 }
             } catch (e: Exception) {

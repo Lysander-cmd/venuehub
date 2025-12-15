@@ -33,16 +33,10 @@ import com.kelompok.venuehub.data.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.storage.storage
+
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-
-@Serializable
-data class CheckoutRequest(
-    val booking_id: Long,
-    val user_id: String,
-    val notes: String,
-    val clean_proof_url: String
-)
+import com.example.venuehub.model.CheckoutRequest
 
 @Composable
 fun CheckoutScreen(navController: NavController, bookingId: Long) {

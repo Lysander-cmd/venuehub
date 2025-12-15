@@ -18,12 +18,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.venuehub.model.BookingHistoryItem
+import com.example.venuehub.model.BookingWithCheckout
 import com.example.venuehub.ui.features.admin.AdminHeader
 import com.example.venuehub.ui.theme.BluePrimary
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.ui.draw.clip
 import java.util.TimeZone
+import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun HistoryBookingScreen(
@@ -63,7 +67,7 @@ fun HistoryBookingScreen(
 }
 
 @Composable
-fun BookingHistoryCard(booking: BookingHistoryItem, navController: NavController) {
+fun BookingHistoryCard(booking: BookingWithCheckout, navController: NavController) {
     val statusColor = when (booking.status.lowercase()) {
         "approved" -> Color(0xFF4CAF50)
         "completed" -> Color(0xFF2196F3)
@@ -146,6 +150,7 @@ fun BookingHistoryCard(booking: BookingHistoryItem, navController: NavController
                 Text(text = displayDate, fontSize = 12.sp, color = Color.Gray)
             }
 
+
             if (booking.status == "approved") {
                 Spacer(modifier = Modifier.height(15.dp))
                 Button(
@@ -160,12 +165,76 @@ fun BookingHistoryCard(booking: BookingHistoryItem, navController: NavController
 
             if (booking.status == "completed") {
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "Peminjaman telah selesai.",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Peminjaman telah selesai.",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+
+                    val checkoutData = booking.checkouts?.firstOrNull()
+                    val proofUrl = checkoutData?.clean_proof_url
+                    val notes = checkoutData?.notes
+
+                    if (proofUrl != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        var showDialog by remember { mutableStateOf(false) }
+
+                        Text(
+                            text = "Lihat Bukti Kebersihan",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = BluePrimary,
+                            modifier = Modifier
+                                .clickable { showDialog = true }
+                                .padding(4.dp)
+                        )
+
+                        if (showDialog) {
+                            Dialog(onDismissRequest = { showDialog = false }) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White, RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(10.dp))
+                                ) {
+                                    Column {
+                                        AsyncImage(
+                                            model = proofUrl,
+                                            contentDescription = "Bukti Kebersihan",
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentScale = ContentScale.FillWidth
+                                        )
+
+                                        if (!notes.isNullOrBlank()) {
+                                            Column(modifier = Modifier.padding(16.dp)) {
+                                                Text(
+                                                    text = "Catatan:",
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 14.sp
+                                                )
+                                                Text(
+                                                    text = notes,
+                                                    fontSize = 14.sp,
+                                                    color = Color.DarkGray
+                                                )
+                                            }
+                                        }
+                                        Button(
+                                            onClick = { showDialog = false },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(8.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = BluePrimary)
+                                        ) {
+                                            Text("Tutup")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

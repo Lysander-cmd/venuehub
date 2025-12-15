@@ -186,8 +186,12 @@ fun AdminApprovalCard(
                 }
             } else {
 
-                val color = if (booking.status == "approved") Color(0xFF4CAF50) else Color.Red
-                val text = if (booking.status == "approved") "Disetujui" else "Ditolak"
+                val (color, text) = when (booking.status) {
+                    "approved" -> Color(0xFF4CAF50) to "Disetujui"
+                    "completed" -> Color(0xFF2196F3) to "Selesai"
+                    "rejected" -> Color.Red to "Ditolak"
+                    else -> Color.Gray to booking.status
+                }
 
                 Text(
                     text = text,
