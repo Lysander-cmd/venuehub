@@ -23,6 +23,8 @@ import com.example.venuehub.ui.features.home.KetentuanScreen
 import com.example.venuehub.ui.features.main.AdminMainScreen
 import com.example.venuehub.ui.features.main.UserMainScreen
 import com.example.venuehub.ui.features.report.AddReportScreen
+import com.example.venuehub.ui.features.report.DetailReportScreen
+import com.example.venuehub.ui.features.report.ReportScreen
 import com.kelompok.venuehub.data.SupabaseClient
 import io.github.jan.supabase.auth.auth
 
@@ -56,6 +58,9 @@ fun AppNavigation() {
 
         composable("home") {
             UserMainScreen(rootNavController = navController)
+        }
+        composable("report_history") {
+            ReportScreen(navController = navController)
         }
         composable("ketentuan") {
             KetentuanScreen(navController)
@@ -101,6 +106,14 @@ fun AppNavigation() {
         }
         composable("add_report") {
             AddReportScreen(navController)
+        }
+
+        composable(
+            route = "detail_report/{reportId}",
+            arguments = listOf(navArgument("reportId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val reportId = backStackEntry.arguments?.getLong("reportId") ?: 0L
+            DetailReportScreen(navController, reportId)
         }
         composable(
             route = "category_rooms/{categoryType}/{categoryName}",
