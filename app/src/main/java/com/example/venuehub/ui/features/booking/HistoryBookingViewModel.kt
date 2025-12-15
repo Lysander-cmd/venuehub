@@ -17,7 +17,6 @@ class HistoryViewModel : ViewModel() {
     var bookingList by mutableStateOf<List<BookingWithCheckout>>(emptyList())
     var isLoading by mutableStateOf(true)
 
-    // Database Read (Fetch History)
     fun fetchHistory() {
         viewModelScope.launch {
             try {

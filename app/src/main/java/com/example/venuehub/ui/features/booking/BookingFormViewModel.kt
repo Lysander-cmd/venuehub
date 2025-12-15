@@ -16,7 +16,6 @@ import java.util.Calendar
 import java.util.TimeZone
 
 class BookingViewModel : ViewModel() {
-    // UI States
     var roomData by mutableStateOf<RoomItemData?>(null)
     var eventName by mutableStateOf("")
     var selectedDate by mutableStateOf("")
@@ -25,7 +24,6 @@ class BookingViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
     var ktmUri by mutableStateOf<Uri?>(null)
 
-    // Read Data Ruangan
     fun fetchRoomData(roomId: Long) {
         viewModelScope.launch {
             try {
@@ -39,7 +37,6 @@ class BookingViewModel : ViewModel() {
         }
     }
 
-    // Fungsi submit
     fun submitBooking(
         context: Context,
         roomId: Long,
@@ -57,7 +54,7 @@ class BookingViewModel : ViewModel() {
                     return@launch
                 }
 
-                // ===== LOGIKA WAKTU =====
+                // LOGIKA WAKTU
                 val dateParts = selectedDate.split("/")
                 val day = dateParts[0].toInt()
                 val month = dateParts[1].toInt()
@@ -86,7 +83,7 @@ class BookingViewModel : ViewModel() {
                     return@launch
                 }
 
-                // ===== CEK JADWAL BENTROK (READ) =====
+                // CEK JADWAL BENTROK
                 val existingBooking = SupabaseClient.client.from("bookings")
                     .select {
                         filter {
@@ -102,11 +99,11 @@ class BookingViewModel : ViewModel() {
                     return@launch
                 }
 
-                // ===== UPLOAD KTM (CLOUD STORAGE) =====
+                // UPLOAD KTM
                 val fileName = "ktm_${user.id}_${System.currentTimeMillis()}.jpg"
                 val bucket = SupabaseClient.client.storage.from("ktm-images")
 
-                // ===== VALIDASI KTM =====
+                // VALIDASI KTM
                 val mimeType = context.contentResolver.getType(ktmUri!!)
                 if (mimeType == null || !mimeType.startsWith("image/")) {
                     onError("Format KTM harus berupa gambar (JPG / PNG)")
@@ -127,7 +124,7 @@ class BookingViewModel : ViewModel() {
                 bucket.upload(fileName, ktmBytes)
                 val ktmUrl = bucket.publicUrl(fileName)
 
-                // ===== INSERT DATABASE =====
+                // INSERT DATABASE
                 val booking = BookingRequest(
                     room_id = roomId,
                     user_id = user.id,

@@ -93,7 +93,7 @@ fun BookingHistoryCard(booking: BookingWithCheckout, navController: NavControlle
         val date = parser.parse(booking.start_time)
         formatter.format(date!!)
     } catch (e: Exception) {
-        booking.start_time // Fallback jika error
+        booking.start_time
     }
 
     Card(

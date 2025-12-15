@@ -39,7 +39,7 @@ import java.util.Calendar
 fun BookingFormScreen(
     navController: NavController,
     roomId: Long,
-    viewModel: BookingViewModel = viewModel() // POIN 5: Menerapkan ViewModel
+    viewModel: BookingViewModel = viewModel()
 ) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
