@@ -155,7 +155,7 @@ fun ReportItemCard(
                     contentDescription = "Bukti Kerusakan",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp) // Tinggi gambar
+                        .height(150.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color.LightGray),
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop

@@ -30,7 +30,7 @@ import io.github.jan.supabase.postgrest.from
 @Composable
 fun DetailReportScreen(
     navController: NavController,
-    reportId: Long // Kita terima ID laporan
+    reportId: Long
 ) {
     var reportData by remember { mutableStateOf<ReportHistoryItem?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -56,9 +56,7 @@ fun DetailReportScreen(
                 title = { Text("Detail Laporan") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        navController.navigate("report_history") {
-                            popUpTo("report_history") { inclusive = true }
-                        }
+                        navController.popBackStack()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
                     }
@@ -84,17 +82,16 @@ fun DetailReportScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(20.dp)
             ) {
-                // 1. Gambar Besar
                 if (item.proof_url != null) {
                     AsyncImage(
                         model = item.proof_url,
                         contentDescription = "Bukti Full",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp) // Lebih besar dari card
+                            .height(300.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color.LightGray),
-                        contentScale = ContentScale.Fit // Agar seluruh gambar terlihat
+                        contentScale = ContentScale.Fit
                     )
                 }
 

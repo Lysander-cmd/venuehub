@@ -54,12 +54,12 @@ fun AddReportScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
 
     var description by remember { mutableStateOf("") }
-    var severity by remember { mutableStateOf("Ringan") } // Default
+    var severity by remember { mutableStateOf("Ringan") }
     var selectedRoom by remember { mutableStateOf<RoomItemData?>(null) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     var roomsList by remember { mutableStateOf<List<RoomItemData>>(emptyList()) }
-    var expandedDropdown by remember { mutableStateOf(false) } // Untuk Dropdown Ruangan
+    var expandedDropdown by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) {
@@ -85,7 +85,6 @@ fun AddReportScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp)
         ) {
-            // 1. PILIH RUANGAN (Dropdown)
             Text("Lokasi Kerusakan", style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(8.dp))
 
