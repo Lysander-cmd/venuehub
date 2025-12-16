@@ -85,7 +85,7 @@ fun ReportScreen(navController: NavController) {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = true }
                     }
-                }) // No back button
+                })
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -117,7 +117,6 @@ fun ReportItemCard(
     report: ReportHistoryItem,
     onClick: () -> Unit
 ) {
-    // Logic warna status
     val statusColor = if (report.status == "fixed") Color(0xFF4CAF50) else Color(0xFFFF9800)
     val statusText = if (report.status == "open") "Dalam Review" else "Selesai"
 
@@ -130,7 +129,6 @@ fun ReportItemCard(
             .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(15.dp)) {
-            // Header: Nama Ruangan & Status
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = report.rooms?.name ?: "Ruangan",
@@ -151,7 +149,6 @@ fun ReportItemCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // --- BAGIAN BARU: MENAMPILKAN GAMBAR ---
             if (report.proof_url != null) {
                 AsyncImage(
                     model = report.proof_url,
@@ -165,13 +162,11 @@ fun ReportItemCard(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
             }
-            // ---------------------------------------
 
             Text("Masalah: ${report.description}", fontSize = 14.sp)
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Sedikit styling biar Severity terlihat jelas
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))

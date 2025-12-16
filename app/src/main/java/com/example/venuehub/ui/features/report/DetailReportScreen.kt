@@ -141,9 +141,6 @@ fun DetailReportScreen(
                 Text("Tanggal Laporan:", fontWeight = FontWeight.SemiBold, color = Color.Gray)
                 Text(item.created_at.take(10), fontSize = 16.sp, modifier = Modifier.padding(top = 4.dp))
 
-                // --- AREA ADMIN ---
-                // Jika kamu ingin menambahkan tombol ubah status, letakkan di sini.
-                // Logikanya: Cek role user, jika admin, tampilkan tombol "Mark as Done".
             }
         }
     }
