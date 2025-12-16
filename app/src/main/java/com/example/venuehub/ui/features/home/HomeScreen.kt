@@ -165,7 +165,15 @@ fun HomeHeader(userName: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BannerSection() {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+
+    val bannerImages = remember {
+        listOf(
+            R.drawable.gkm1,
+            R.drawable.gedungf,
+            R.drawable.junction
+        )
+    }
+    val pagerState = rememberPagerState(pageCount = { bannerImages.size })
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(
@@ -181,12 +189,12 @@ fun BannerSection() {
                 elevation = CardDefaults.cardElevation(5.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                Box(modifier = Modifier.fillMaxSize().background(Color.LightGray)) {
-                    Text(
-                        text = "Banner Info ${page + 1}",
-                        modifier = Modifier.align(Alignment.Center),
-                        fontWeight = FontWeight.Bold
-                    )
+                Image(
+                    painter = painterResource(id = bannerImages[page]),
+                    contentDescription = "Banner Image ${page + 1}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
                 }
             }
         }
@@ -194,7 +202,8 @@ fun BannerSection() {
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
-            modifier = Modifier.wrapContentHeight(),
+            modifier = Modifier.wrapContentHeight()
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             repeat(pagerState.pageCount) { iteration ->
@@ -209,8 +218,6 @@ fun BannerSection() {
             }
         }
     }
-}
-
 @Composable
 fun InfoMenuSection(navController: NavController) {
     Row(

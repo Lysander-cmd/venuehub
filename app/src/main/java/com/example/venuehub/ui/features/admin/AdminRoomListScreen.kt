@@ -79,7 +79,7 @@ fun AdminRoomListScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF5F5F5)) // Background abu muda
+                .background(Color(0xFFF5F5F5))
         ) {
             RoomListHeader()
 
