@@ -1,6 +1,5 @@
 package com.example.venuehub.ui.features.booking
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,10 +17,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.venuehub.ui.features.admin.AdminHeader
 import com.example.venuehub.ui.theme.BluePrimary
-import com.kelompok.venuehub.data.SupabaseClient
-import io.github.jan.supabase.postgrest.from
-import kotlinx.serialization.Serializable
-import io.github.jan.supabase.postgrest.query.Columns
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
