@@ -59,7 +59,6 @@ fun AdminAddRoomScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // --- STATE INPUT FORM ---
     var name by remember { mutableStateOf("") }
     var capacity by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -109,7 +108,7 @@ fun AdminAddRoomScreen(navController: NavController) {
                                     } ?: throw Exception("Gagal membaca gambar")
 
                                     val fileName = "room_${System.currentTimeMillis()}.jpg"
-                                    val bucket = SupabaseClient.client.storage.from("room-images") // Pastikan bucket ini ada
+                                    val bucket = SupabaseClient.client.storage.from("room-images")
                                     bucket.upload(fileName, byteArray)
 
                                     val publicUrl = bucket.publicUrl(fileName)
@@ -247,7 +246,6 @@ fun AdminAddRoomScreen(navController: NavController) {
                     maxLines = 4
                 )
 
-                // Spacer tambahan agar tidak ketutup tombol
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }
@@ -280,7 +278,7 @@ fun AdminInputRef(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent, // Hilangkan garis bawah default
+                focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),

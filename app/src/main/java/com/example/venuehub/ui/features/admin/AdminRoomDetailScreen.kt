@@ -74,7 +74,7 @@ fun AdminRoomDetailScreen(navController: NavController, roomId: Long) {
                                     filter { eq("id", roomId) }
                                 }
                                 Toast.makeText(context, "Ruangan dihapus", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack() // Kembali ke list
+                                navController.popBackStack()
                             } catch (e: Exception) {
                                 Toast.makeText(context, "Gagal menghapus", Toast.LENGTH_SHORT).show()
                             }
@@ -158,7 +158,7 @@ fun AdminRoomDetailScreen(navController: NavController, roomId: Long) {
                         )
                     }
 
-                    Spacer(modifier = Modifier.weight(1f)) // Dorong tombol ke bawah jika konten sedikit
+                    Spacer(modifier = Modifier.weight(1f))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -175,17 +175,6 @@ fun AdminRoomDetailScreen(navController: NavController, roomId: Long) {
                             Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
                             Spacer(modifier = Modifier.width(5.dp))
                             Text("Hapus", color = Color.Red, fontWeight = FontWeight.Bold)
-                        }
-
-                        Button(
-                            onClick = { Toast.makeText(context, "Fitur Edit segera hadir", Toast.LENGTH_SHORT).show() },
-                            colors = ButtonDefaults.buttonColors(containerColor = BluePrimary),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.weight(1f).height(50.dp)
-                        ) {
-                            Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White)
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text("Edit", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
