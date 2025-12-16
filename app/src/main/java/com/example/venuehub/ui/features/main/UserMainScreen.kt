@@ -19,6 +19,7 @@ import com.example.venuehub.ui.features.home.HomeScreen
 import com.example.venuehub.ui.features.profile.ProfileScreen
 import com.example.venuehub.ui.features.report.ReportScreen
 import com.example.venuehub.ui.theme.BluePrimary
+import androidx.compose.runtime.saveable.rememberSaveable
 
 sealed class UserBottomNavItem(val route: String, val title: String, val icon: ImageVector) {
     object Home : UserBottomNavItem("home_tab", "Beranda", Icons.Default.Home)
@@ -27,9 +28,20 @@ sealed class UserBottomNavItem(val route: String, val title: String, val icon: I
     object Profile : UserBottomNavItem("profile_tab", "Profil", Icons.Default.Person)
 }
 
+
+
 @Composable
 fun UserMainScreen(rootNavController: NavController) {
-    var currentTab by remember { mutableStateOf<UserBottomNavItem>(UserBottomNavItem.Home) }
+    val items = listOf(
+        UserBottomNavItem.Home,
+        UserBottomNavItem.History,
+        UserBottomNavItem.Report,
+        UserBottomNavItem.Profile
+    )
+    
+    // Gunakan rememberSaveable agar state (tab yang dipilih) tersimpan saat navigasi
+    var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
+    val currentTab = items[selectedItemIndex]
 
     Scaffold(
         bottomBar = {
@@ -38,21 +50,14 @@ fun UserMainScreen(rootNavController: NavController) {
                 contentColor = BluePrimary,
                 tonalElevation = 8.dp
             ) {
-                val items = listOf(
-                    UserBottomNavItem.Home,
-                    UserBottomNavItem.History,
-                    UserBottomNavItem.Report,
-                    UserBottomNavItem.Profile
-                )
-
-                items.forEach { item ->
-                    val isSelected = currentTab == item
+                items.forEachIndexed { index, item ->
+                    val isSelected = selectedItemIndex == index
 
                     NavigationBarItem(
                         icon = { Icon(item.icon, contentDescription = item.title) },
                         label = { Text(item.title) },
                         selected = isSelected,
-                        onClick = { currentTab = item },
+                        onClick = { selectedItemIndex = index },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = BluePrimary,
                             selectedTextColor = BluePrimary,
