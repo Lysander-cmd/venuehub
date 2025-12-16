@@ -32,7 +32,6 @@ fun UserRoomDetailScreen(
     roomId: Long,
     viewModel: RoomDetailViewModel = viewModel()
 ) {
-    // Panggil fungsi fetch dari ViewModel
     LaunchedEffect(roomId) {
         viewModel.fetchRoomDetail(roomId)
     }
@@ -97,7 +96,7 @@ fun UserRoomDetailScreen(
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))
-                        // Divider diganti HorizontalDivider sesuai Material3 terbaru agar tidak merah
+
                         HorizontalDivider(color = Color(0xFFEEEEEE), thickness = 1.dp)
                         Spacer(modifier = Modifier.height(20.dp))
 

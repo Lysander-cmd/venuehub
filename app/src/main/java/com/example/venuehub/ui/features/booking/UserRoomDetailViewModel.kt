@@ -11,11 +11,9 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.launch
 
 class RoomDetailViewModel : ViewModel() {
-    // UI States
     var roomData by mutableStateOf<RoomItemData?>(null)
     var isLoading by mutableStateOf(true)
 
-    // Database Read (Fetch Detail Ruangan)
     fun fetchRoomDetail(roomId: Long) {
         viewModelScope.launch {
             try {
