@@ -85,7 +85,6 @@ fun AddReportScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp)
         ) {
-            // 1. PILIH RUANGAN (Dropdown)
             Text("Lokasi Kerusakan", style = MaterialTheme.typography.titleSmall)
             Spacer(modifier = Modifier.height(8.dp))
 
