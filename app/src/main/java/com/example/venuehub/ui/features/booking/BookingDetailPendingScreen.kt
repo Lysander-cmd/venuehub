@@ -66,9 +66,8 @@ fun bookingStatusColor(status: String): Color = when (status.lowercase()) {
 fun BookingDetailPendingScreen(
     bookingId: Long,
     navController: NavController,
-    viewModel: BookingDetailPendingViewModel = viewModel() // Panggil ViewModel
+    viewModel: BookingDetailPendingViewModel = viewModel()
 ) {
-    // Ambil data lewat ViewModel
     LaunchedEffect(bookingId) {
         viewModel.fetchBookingDetail(bookingId)
     }
@@ -80,7 +79,7 @@ fun BookingDetailPendingScreen(
                 onBackClick = { navController.popBackStack() }
             )
         },
-        containerColor = Color(0xFFF5F5F5) // Memberikan kontras pada card
+        containerColor = Color(0xFFF5F5F5)
     ) { padding ->
 
         if (viewModel.isLoading) {
@@ -103,7 +102,6 @@ fun BookingDetailPendingScreen(
                 "Status" to bookingStatusText(viewModel.booking?.status ?: "pending")
             )
 
-            // LazyColumn DI DETAIL
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
